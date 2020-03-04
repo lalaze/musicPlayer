@@ -30,6 +30,7 @@ class Dispatcher {
       // https://developer.mozilla.org/zh-CN/docs/Web/API/AudioContext
       this.playList = []
       this.playIndex = 0
+      this.isPlaying = false
   
       this.emptyNode = {
         file: null,
@@ -110,6 +111,8 @@ class Dispatcher {
     } 
 
     playVersion(source) {
+      this.isPlaying = true
+
       let analyser = this.audioContext.createAnalyser();
       analyser.fftSize = 256
 
@@ -131,12 +134,16 @@ class Dispatcher {
       let barWidth = WIDTH / bufferLength * 1.5;
       let barHeight;
       
+      let that = this;
       let draw = function () {
-        requestAnimationFrame(draw);
+        if (!that.isPlaying) {
+          that.clearPlayVersion(WIDTH,HEIGHT,barWidth,barHeight)
+          return;
+        }
         analyser.getByteFrequencyData(dataArray); 
-
+        requestAnimationFrame(draw);
+        
         ctx.clearRect(0, 0, barWidth, barHeight);
-
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
         for (var i = 0, x = 0; i < bufferLength; i++) {
@@ -154,11 +161,20 @@ class Dispatcher {
       }
       draw()
     }
+
+    clearPlayVersion(a,b,c,d) {
+      let canvas = document.getElementById('canvas')
+      let ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, a, b);
+      ctx.clearRect(0, 0, c, d);
+    }
   
     pause () {
       if (!this.playList.length || !this.current.source) {
         return
       }
+
+      this.isPlaying = false
 
       this.current.source.stop(0)
       this.current.source.disconnect(0)
@@ -172,10 +188,13 @@ class Dispatcher {
     }
   
     stop () {
+      this.isPlaying = false
+
       this.pause()
       // 重新播放咯
       this.current.offset = 0
       this.current.start = null
+      
     }
   
     next () {
