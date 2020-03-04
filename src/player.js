@@ -105,12 +105,61 @@ class Dispatcher {
       // onplay改变是否播放
   
       // 最后的问题，给了source
+      this.playVersion(source)
+
+    } 
+
+    playVersion(source) {
+      let analyser = this.audioContext.createAnalyser();
+      analyser.fftSize = 256
+
+      source.connect(analyser);
+      analyser.connect(this.audioContext.destination);
+
+      let bufferLength = analyser.frequencyBinCount;
+      let dataArray = new Uint8Array(bufferLength);
+
+      let canvas = document.getElementById('canvas');
+    
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let ctx = canvas.getContext("2d");
+      let WIDTH = canvas.width;
+      let HEIGHT = canvas.height;
+
+      let barWidth = WIDTH / bufferLength * 1.5;
+      let barHeight;
+      
+      let draw = function () {
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray); 
+
+        ctx.clearRect(0, 0, barWidth, barHeight);
+
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        for (var i = 0, x = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i];
+
+            var r = barHeight + 25 * (i / bufferLength);
+            var g = 250 * (i / bufferLength);
+            var b = 50;
+
+            ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+            ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+
+            x += barWidth + 2;
+        }
+      }
+      draw()
     }
   
     pause () {
       if (!this.playList.length || !this.current.source) {
         return
       }
+
       this.current.source.stop(0)
       this.current.source.disconnect(0)
       this.current.source.onended = null

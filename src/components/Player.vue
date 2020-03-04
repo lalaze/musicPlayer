@@ -10,6 +10,7 @@
     <div class="player_progress">
       <progress-bar />
     </div>
+    <canvas id="canvas" ref="canvas" style="position:fixed;bottom:0;left:0;z-index:-1;"></canvas>
   </div>
 </template>
 

@@ -68,7 +68,7 @@ export default {
         // 牛皮呀获取了页面的所有样式，返回一个stylesheet的列表
         styles.forEach(style => {
           const rules = [...style.cssRules]
-          console.log(rules)
+          // console.log(rules)
           // cssRules返回了样式中所有的规则
           // 然后循环做啥呢
           rules.forEach(rule => {
